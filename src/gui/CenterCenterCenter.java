@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 
 public class CenterCenterCenter extends JPanel {
     public CenterCenterCenter() {
-        Color myGray = new Color(40,40,40);
+        Color myGray = new Color(50,50,50);
         setBackground(myGray);
         setLayout(new ModifiedFlowLayout());
     }
