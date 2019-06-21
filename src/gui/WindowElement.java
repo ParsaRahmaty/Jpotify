@@ -18,7 +18,7 @@ public class WindowElement extends Element {
         setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
         setLayout(null);
         if (imagePath == null)
-            imagePath = "default.jpg";
+            imagePath = "ICON_SOURCE\\default.jpg";
         try {
             BufferedImage img = ImageIO.read(getClass().getResource(imagePath));
             BufferedImage finalImg = new BufferedImage(PANEL_WIDTH, PANEL_WIDTH, img.getType());

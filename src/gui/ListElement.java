@@ -18,7 +18,7 @@ public class ListElement extends Element{
         setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
         setLayout(null);
         if (imagePath == null)
-            imagePath = "default.jpg";
+            imagePath = "ICON_SOURCE\\default90.jpg";
         try {
             BufferedImage img = ImageIO.read(getClass().getResource(imagePath));
             BufferedImage finalImg = new BufferedImage(PANEL_HEIGHT, PANEL_HEIGHT, img.getType());
