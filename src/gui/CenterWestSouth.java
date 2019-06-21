@@ -1,8 +1,13 @@
 package gui;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 
 public class CenterWestSouth extends JPanel {
@@ -12,15 +17,21 @@ public class CenterWestSouth extends JPanel {
 
     private int buttonNumbers1;
     private int buttonNumbers2;
-    public CenterWestSouth(){
 
+
+    private JFileChooser fileChooser;//fileChooser.showOpenDialog(new East());
+
+    public CenterWestSouth() throws IOException {
+
+        fileChooser = new JFileChooser();
 
         buttons1 = new ArrayList<>();
         buttons2 = new ArrayList<>();
 
-        setLayout(new GridLayout(0, 1));
-        JTextField textField1 = new JTextField("PLAYLISTS");
-        JTextField textField2 = new JTextField("YOUR LIBRARY");
+        setLayout(new GridLayout(0, 1, 0, -5));
+
+        JTextField textField1 = new JTextField("    PLAYLISTS");
+        JTextField textField2 = new JTextField(" YOUR LIBRARY");
         textField1.setForeground(Color.WHITE);
         textField2.setForeground(Color.WHITE);
 
@@ -51,13 +62,44 @@ public class CenterWestSouth extends JPanel {
         addButton(buttons1, buttonNumbers1);
         add(textField2);
         addButton(buttons2, buttonNumbers2);
-
 //=====================================
+
+
+
+        //===============================
         addNewPlayList = new JButton();
-        JPanel panel = new JPanel();
-        panel.add(addNewPlayList);
-        panel.add(new JTextArea("New Playlist"));
-        add(panel);
+//        addNewPlayList.setBorderPainted(false);
+        addNewPlayList.setPreferredSize(new Dimension(20, 20));
+        addNewPlayList.setSize(new Dimension(20, 20));
+        addNewPlayList.setBackground(Color.BLACK);
+        JTextArea textArea = new JTextArea("New Playlist");
+        textArea.setEditable(false);
+        textArea.setForeground(Color.WHITE);
+        textArea.setBackground(Color.BLACK);
+
+
+
+//        BufferedImage img = ImageIO.read(getClass().getResource("C:\\Users\\admin\\IdeaProjects\\Jpotify\\src\\gui\\p.jpg"));
+        BufferedImage img = ImageIO.read(new File("C:\\Users\\admin\\IdeaProjects\\Jpotify\\src\\gui\\p.jpg"));
+        BufferedImage finalImg = new BufferedImage(addNewPlayList.getWidth(), addNewPlayList.getHeight(), img.getType());
+        Graphics2D graphics2D = finalImg.createGraphics();
+        graphics2D.drawImage(img, 0, 0, addNewPlayList.getWidth(), addNewPlayList.getHeight(), null);
+        graphics2D.dispose();
+        addNewPlayList.setIcon(new ImageIcon(finalImg));
+//        addNewPlayList.setBounds(0, 0 , 50, 50);
+
+        JPanel p = new JPanel();
+        p.add(addNewPlayList, BorderLayout.WEST);
+        p.add(textArea, BorderLayout.CENTER);
+
+
+
+
+        p.setBackground(Color.BLACK);
+
+//        add(textArea);
+        add(p);
+//        add(addNewPlayList);
 
     }
 
