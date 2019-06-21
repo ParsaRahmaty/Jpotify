@@ -11,6 +11,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 
 public class CenterWestSouth extends JPanel {
+    JPanel mainpanel;
     private ArrayList<JButton> buttons1;
     private ArrayList<JButton> buttons2;
     private JButton addNewPlayList;
@@ -23,17 +24,34 @@ public class CenterWestSouth extends JPanel {
 
     public CenterWestSouth() throws IOException {
 
+//        setSize(new Dimension(128, 10000));
+
+
+
+
+//        setSize(new Dimension(100, 1000));
+
+//        setSize(new Dimension(128, 100));
+        mainpanel = new JPanel();
+
+
+
         fileChooser = new JFileChooser();
 
         buttons1 = new ArrayList<>();
         buttons2 = new ArrayList<>();
 
-        setLayout(new GridLayout(0, 1, 0, -5));
+//        setLayout(new GridLayout(0, 1, 0, -5));
+        setLayout(new FlowLayout());
 
         JTextField textField1 = new JTextField("    PLAYLISTS");
         JTextField textField2 = new JTextField(" YOUR LIBRARY");
+
+
         textField1.setForeground(Color.WHITE);
         textField2.setForeground(Color.WHITE);
+
+
 
         buttons1.add(new JButton("sag"));
         buttons1.add(new JButton("sag"));
@@ -41,6 +59,22 @@ public class CenterWestSouth extends JPanel {
         buttons2.add(new JButton("sag"));
         buttons2.add(new JButton("sag"));
         buttons2.add(new JButton("sag"));
+        buttons2.add(new JButton("sag"));
+        buttons2.add(new JButton("sag"));
+        buttons2.add(new JButton("sag"));
+        buttons2.add(new JButton("sag"));
+        buttons2.add(new JButton("sag"));
+        buttons2.add(new JButton("sag"));
+        buttons2.add(new JButton("sag"));
+
+
+        buttonNumbers1 = buttons1.size();
+        buttonNumbers2 = buttons2.size();
+
+
+
+        setPreferredSize(new Dimension(130, 31 * (buttonNumbers1+buttonNumbers2)));
+
 
 
 
@@ -51,60 +85,91 @@ public class CenterWestSouth extends JPanel {
         textField2.setBackground(Color.GRAY);
 
 
-//        textField1.setFont(new Font("Area", Font.BOLD, 12));
-//        textField2.setFont(new Font("Area", Font.BOLD, 12));
+        textField1.setFont(new Font("serif", Font.BOLD, 12));
+        textField2.setFont(new Font("serif", Font.BOLD, 12));
+        textField1.setPreferredSize(new Dimension(100, 15));
+        textField2.setPreferredSize(new Dimension(100, 15));
 
 
 
-        buttonNumbers1 = buttons1.size();
-        buttonNumbers2 = buttons2.size();
+
+
+
         add(textField1);
         addButton(buttons1, buttonNumbers1);
         add(textField2);
         addButton(buttons2, buttonNumbers2);
-//=====================================
 
 
-
-        //===============================
         addNewPlayList = new JButton();
+
+
 //        addNewPlayList.setBorderPainted(false);
-        addNewPlayList.setPreferredSize(new Dimension(20, 20));
-        addNewPlayList.setSize(new Dimension(20, 20));
-        addNewPlayList.setBackground(Color.BLACK);
+//        addNewPlayList.setPreferredSize(new Dimension(20, 20));
+//        addNewPlayList.setSize(new Dimension(20, 20));
+        addNewPlayList.setBackground(Color.YELLOW);
         JTextArea textArea = new JTextArea("New Playlist");
         textArea.setEditable(false);
         textArea.setForeground(Color.WHITE);
         textArea.setBackground(Color.BLACK);
 
+        addNewPlayList.setPreferredSize(new Dimension(22, 22));
 
 
-//        BufferedImage img = ImageIO.read(getClass().getResource("C:\\Users\\admin\\IdeaProjects\\Jpotify\\src\\gui\\p.jpg"));
         BufferedImage img = ImageIO.read(new File("C:\\Users\\admin\\IdeaProjects\\Jpotify\\src\\gui\\p.jpg"));
-        BufferedImage finalImg = new BufferedImage(addNewPlayList.getWidth(), addNewPlayList.getHeight(), img.getType());
+        BufferedImage finalImg = new BufferedImage(20, 20, img.getType());
         Graphics2D graphics2D = finalImg.createGraphics();
-        graphics2D.drawImage(img, 0, 0, addNewPlayList.getWidth(), addNewPlayList.getHeight(), null);
+        graphics2D.drawImage(img, 0, 0, 20, 20, null);
         graphics2D.dispose();
         addNewPlayList.setIcon(new ImageIcon(finalImg));
-//        addNewPlayList.setBounds(0, 0 , 50, 50);
 
-        JPanel p = new JPanel();
-        p.add(addNewPlayList, BorderLayout.WEST);
-        p.add(textArea, BorderLayout.CENTER);
+        addNewPlayList.setFocusPainted(false);
+        addNewPlayList.setBorderPainted(false);
 
 
 
+        mainpanel = new JPanel();
+//        p.setLayout();
+        mainpanel.add(addNewPlayList);
+        mainpanel.add(textArea);
 
-        p.setBackground(Color.BLACK);
 
-//        add(textArea);
-        add(p);
-//        add(addNewPlayList);
+
+        mainpanel.setBackground(Color.GREEN);
+
+
+        add(mainpanel);
+//        setSize(new Dimension(130, 100000));
+
 
     }
 
     public void addButton(ArrayList<JButton> buttonsToBeAdd, int numbers){
+
+
+
+
+//        setPreferredSize(new Dimension(100, 30 * numbers));
+
+
+//        setPreferredSize(new Dimension(128, 40 * numbers));
+//        mainpanel.setPreferredSize(new Dimension(128, 40 * numbers));
+
+//        setSize(new Dimension(128, 100000));
+
+
         for (int i = 0; i < numbers; i++) {
+
+
+//            mainpanel.setSize(new Dimension(130, 40 * numbers));
+//            setSize(new Dimension(128, numbers));
+            mainpanel.setPreferredSize(new Dimension(130, 40 * numbers));
+
+            buttonsToBeAdd.get(i).setPreferredSize(new Dimension(130, 20));
+            buttonsToBeAdd.get(i).setBorderPainted(false);
+            buttonsToBeAdd.get(i).setFocusPainted(false);
+            //            buttonsToBeAdd.get(i).setSize(new Dimension(20, 20));
+
             add(buttonsToBeAdd.get(i));
             buttonsToBeAdd.get(i).setForeground(Color.WHITE);
             buttonsToBeAdd.get(i).setBackground(Color.BLACK);
