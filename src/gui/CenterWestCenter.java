@@ -8,22 +8,18 @@ import java.io.File;
 import java.io.IOException;
 
 public class CenterWestCenter extends JPanel{
-    ImageIcon img;
-    JLabel label = new JLabel();
     public CenterWestCenter() throws IOException {
-//        img = new ImageIcon("C:\\Users\\admin\\IdeaProjects\\Jpotify\\src\\gui\\sabab.jpg");
-//        label.setIcon(img);
         setLayout(new FlowLayout());
 
-        BufferedImage img = ImageIO.read(new File("C:\\Users\\admin\\IdeaProjects\\Jpotify\\src\\gui\\sabab.jpg"));
-        BufferedImage finalImg = new BufferedImage(128, 200, img.getType());
+        BufferedImage img = ImageIO.read(new File("C:\\Users\\admin\\IdeaProjects\\Jpotify\\src\\gui\\sheriffff.jpg"));
+        BufferedImage finalImg = new BufferedImage(135, 210, img.getType());
         Graphics2D graphics2D = finalImg.createGraphics();
-        graphics2D.drawImage(img, 0, 0, 128, 200, null);
+        graphics2D.drawImage(img, 0, 0, 135, 210, null);
         graphics2D.dispose();
+        JLabel label = new JLabel();
         label.setIcon(new ImageIcon(finalImg));
-        setBackground(Color.GREEN);
 
-
+        setBackground(Color.WHITE);
         add(label);
     }
 }
