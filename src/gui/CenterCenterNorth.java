@@ -2,6 +2,7 @@ package gui;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,13 +17,12 @@ public class CenterCenterNorth extends JPanel {
     private JPanel searchPanel;
     private JButton searchButton;
     private final Font FONT1 = new Font("Microsoft Sans Serif", Font.PLAIN, 12);
-    private boolean isExpanded = false;
     private final Color MY_GRAY = new Color(30, 30, 30);
 
     public CenterCenterNorth() {
         setLayout(new BorderLayout());
         setBackground(MY_GRAY);
-        button = new JButton("Parsa Rahmaty");
+        button = new JButton("Mohammadreza Dorudian");
         add(button, BorderLayout.EAST);
         button.setFont(FONT1);
         button.setBorderPainted(false);
@@ -61,6 +61,7 @@ public class CenterCenterNorth extends JPanel {
         searchBar.setBackground(MY_GRAY);
         searchBar.setFont(FONT1);
         searchBar.setForeground(Color.WHITE);
+        searchBar.setBorder(new BevelBorder(BevelBorder.RAISED, new Color(43, 43, 43), new Color(43, 43, 43)));
         new GhostText(searchBar, "Search for a Music...");
 
         searchButton = new JButton();

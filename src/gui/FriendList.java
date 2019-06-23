@@ -16,6 +16,7 @@ public class FriendList extends JFrame {
     private final Color MY_GRAY = new Color(30, 30, 30);
 
     public FriendList() {
+        super("Friend List");
         ELEMENT_WIDTH = 5000;
         ELEMENT_HEIGHT = 30;
         addWindowListener(new WindowAdapter() {
@@ -26,7 +27,7 @@ public class FriendList extends JFrame {
             }
         });
         if (!isOpen) {
-            setSize(225, 400);
+            setSize(250, 400);
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
             setLayout(new BorderLayout());
@@ -74,6 +75,13 @@ public class FriendList extends JFrame {
                 super.mouseExited(e);
                 SwingUsefulMethods.JButtonSetIcon(FriendList.this, button, "ICON_SOURCE\\i.png", 10, 10);
                 button.setBackground(MY_GRAY);
+            }
+        });
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                FriendList.this.dispose();
+                isOpen = false;
             }
         });
     }

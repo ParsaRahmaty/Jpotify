@@ -18,6 +18,7 @@ public class GhostText implements FocusListener, DocumentListener, PropertyChang
     private Color foregroundColor;
     private final String ghostText;
 
+
     public GhostText(final JTextComponent textComp, String ghostText)
     {
         super();

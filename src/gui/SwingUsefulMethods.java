@@ -2,6 +2,8 @@ package gui;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -17,5 +19,27 @@ public class SwingUsefulMethods {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void paintScrollPane(JScrollPane scrollPane, Color arrowColor, Color barColor, Color backgroundColor) {
+        UIManager.put("ScrollBar.thumb", new ColorUIResource(arrowColor));
+
+        scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() );
+        scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI());
+        scrollPane.getVerticalScrollBar().setBackground(backgroundColor);
+
+        scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors(){
+                this.thumbColor = barColor;
+            }
+        });
+        scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors(){
+                this.thumbColor = barColor;
+            }
+        });
+
     }
 }

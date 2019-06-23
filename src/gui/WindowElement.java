@@ -2,7 +2,10 @@ package gui;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 public class WindowElement extends Element {
@@ -30,6 +33,34 @@ public class WindowElement extends Element {
             e.printStackTrace();
         }
         add(button);
+        button.setBorder(new BevelBorder(BevelBorder.RAISED, new Color(50, 50, 50), new Color(50, 50, 50)));
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                button.setBorder(new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.WHITE));
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                super.mouseReleased(e);
+                button.setBorder(new BevelBorder(BevelBorder.RAISED, new Color(36, 174, 239), new Color(36, 174, 239)));
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
+                button.setBorder(new BevelBorder(BevelBorder.RAISED, new Color(36, 174, 239), new Color(36, 174, 239)));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                super.mouseExited(e);
+                button.setBorder(new BevelBorder(BevelBorder.RAISED, new Color(50, 50, 50), new Color(50, 50, 50)));
+            }
+        });
         button.setBounds(0, 0, PANEL_WIDTH, PANEL_WIDTH);
         Color myGray = new Color(50, 50, 50);
         setBackground(myGray);
