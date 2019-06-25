@@ -36,23 +36,13 @@ public class East extends JPanel {
         addFriend("Sage Mariz", "Anthem of Dogs", "BLACKDOGS", 0);
         addFriend("Sage Pir", "Remember We Die", "Gemini Syndrome", 0);
         addFriend("Sage Mariz", "Anthem of Dogs", "BLACKDOGS", 0);
-        addFriend("Sage Pir", "Remember We Die", "Gemini Syndrome", 0);
-        addFriend("Sage Mariz", "Anthem of Dogs", "BLACKDOGS", 0);
-        addFriend("Sage Pir", "Remember We Die", "Gemini Syndrome", 0);
-        addFriend("Sage Mariz", "Anthem of Dogs", "BLACKDOGS", 0);
-        addFriend("Sage Pir", "Remember We Die", "Gemini Syndrome", 0);
-        addFriend("Sage Mariz", "Anthem of Dogs", "BLACKDOGS", 0);
-        addFriend("Sage Pir", "Remember We Die", "Gemini Syndrome", 0);
-        addFriend("Sage Mariz", "Anthem of Dogs", "BLACKDOGS", 0);
-        addFriend("Sage Pir", "Remember We Die", "Gemini Syndrome", 0);
-        addFriend("Sage Mariz", "Anthem of Dogs", "BLACKDOGS", 0);
         setBounds(0, 0, 130, 0);
     }
 
     public JButton makeButton(String text, String imagePath, int alignment) {
         JButton button = new JButton(text);
         button.setBorderPainted(false);
-        button.setBackground(new Color(43, 43, 43));
+        button.setBackground(MY_GRAY);
         button.setFocusPainted(false);
         button.setForeground(Color.WHITE);
         if (imagePath != null) {
@@ -90,13 +80,13 @@ public class East extends JPanel {
         JPanel panel = new JPanel();
         panel.setBorder(new BevelBorder(BevelBorder.RAISED, Color.DARK_GRAY, Color.DARK_GRAY));
         panel.setBounds(0, 0, 130, 1);
-        panel.setBackground(new Color(43, 43, 43));
+        panel.setBackground(MY_GRAY);
         panel.setLayout(new BorderLayout());
         JButton button = makeButton(name, "ICON_SOURCE\\speakeri", SwingConstants.LEFT);
         panel.add(button, BorderLayout.NORTH);
 
         JPanel labelPanel = new JPanel();
-        labelPanel.setBackground(new Color(43, 43, 43));
+        labelPanel.setBackground(MY_GRAY);
         labelPanel.setLayout(null);
         labelPanel.setPreferredSize(new Dimension(ELEMENT_WIDTH, 60));
         panel.add(labelPanel, BorderLayout.CENTER);

@@ -2,6 +2,7 @@ package gui;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -11,8 +12,15 @@ import java.util.ArrayList;
 
 public class CenterWestCenter extends JPanel {
 
+    private JButton allPlaylist;
+    private JButton allSongs;
+    private JButton allAlbums;
+    private JButton newLibrary;
+    private JButton newPlaylist;
+    private JLabel allLibraries;
+
     private final Font FONT1 = new Font("Microsoft Sans Serif", Font.BOLD, 10);
-    private final Font FONT2 = new Font("Microsoft Sans Serif", Font.PLAIN, 10);
+    private final Font FONT2 = new Font("Microsoft Sans Serif", Font.PLAIN, 11);
     private final Color MY_GRAY = new Color(30, 30, 30);
     private final int ELEMENT_WIDTH;
     private final int ELEMENT_HEIGHT;
@@ -24,21 +32,33 @@ public class CenterWestCenter extends JPanel {
         setLayout(new BorderLayout());
         this.setLayout(new ModifiedFlowLayout());
         setBackground(MY_GRAY);
-        addButton("All Playlist", null, 0, SwingConstants.CENTER, 0);
-        addButton(" Mememnto Mori", "ICON_SOURCE\\playlisti",  15, SwingConstants.LEFT, 1);
-        addButton(" Transmissions", "ICON_SOURCE\\playlisti", 15, SwingConstants.LEFT, 1);
-        addButton(" Nevermind", "ICON_SOURCE\\playlisti", 15, SwingConstants.LEFT, 1);
-        addLabel("All Libraries", SwingConstants.CENTER, 0);
-        JButton newLibrary = addButton("New Library", "ICON_SOURCE\\plusi", 8, SwingConstants.CENTER, 1);
+        allLibraries = addLabel("All Libraries", SwingConstants.CENTER, 0);
+        newLibrary = addButton("New Library", "ICON_SOURCE\\plusi", 8, SwingConstants.CENTER, 1);
         newLibrary.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
-                fileChooser.showOpenDialog(CenterWestCenter.this);
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                FileNameExtensionFilter filter = new FileNameExtensionFilter("*.mp3", "mp3", "mp3");
+                fileChooser.setFileFilter(filter);
+                fileChooser.setDialogTitle("Choose a Path");
+                fileChooser.showOpenDialog(newLibrary);
             }
         });
-        addButton("All Songs", null, 0, SwingConstants.CENTER, 2);
-        addButton("All Albums", null, 0, SwingConstants.CENTER, 3);
+        allSongs = addButton("All Songs", null, 0, SwingConstants.CENTER, 2);
+        allPlaylist = addButton("All Playlist", null, 0, SwingConstants.CENTER, 3);
+        addButton("Heavy Metal", "ICON_SOURCE\\playlisti",  15, SwingConstants.LEFT, 4);
+        addButton("Hard Rock", "ICON_SOURCE\\playlisti", 15, SwingConstants.LEFT, 5);
+        addButton("Favorite", "ICON_SOURCE\\playlisti", 15, SwingConstants.LEFT, 6);
+        newPlaylist = addButton("New Playlist", "ICON_SOURCE\\plusi", 8, SwingConstants.CENTER, 7);
+        newPlaylist.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                NewPlaylist newPlaylist = new NewPlaylist();
+            }
+        });
+        allAlbums = addButton("All Albums", null, 0, SwingConstants.CENTER, 8);
+        addButton("Nevermind", "ICON_SOURCE\\albumi", 15, SwingConstants.LEFT, 9);
         setBounds(0, 0, 130, 0);
     }
 

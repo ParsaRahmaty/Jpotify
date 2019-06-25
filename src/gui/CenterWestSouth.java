@@ -19,7 +19,7 @@ public class CenterWestSouth extends JPanel{
             BufferedImage img = ImageIO.read(getClass().getResource("ICON_SOURCE\\default130.jpg"));
             BufferedImage finalImg = new BufferedImage(130, 130, img.getType());
             Graphics2D graphics2D = finalImg.createGraphics();
-            graphics2D.drawImage(img, 0, 0, 130, 130, null);
+            graphics2D.drawImage(img, 0, 0, 130,130, null);
             graphics2D.dispose();
             label.setBackground(MY_GRAY);
             setBackground(MY_GRAY);

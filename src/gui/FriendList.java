@@ -37,7 +37,7 @@ public class FriendList extends JFrame {
             panel.setLayout(new ModifiedFlowLayout());
             add(new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
             panel.setBackground(MY_GRAY);
-
+            setResizable(false);
             setVisible(true);
 
             addElement("Parsa");
