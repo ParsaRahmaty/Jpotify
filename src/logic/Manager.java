@@ -6,7 +6,6 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
-import java.util.Currency;
 
 public class Manager {
     public static MainFrame mainFrame;
@@ -15,6 +14,7 @@ public class Manager {
     public static ArrayList<Playlist> playlists = new ArrayList<>();
     public static ArrayList<Library> libraries = new ArrayList<>();
     public static ArrayList<Song> nowPlaying = new ArrayList<>();
+    public static Song nowPlayingSong;
 
     public static void setMainFrame(MainFrame mainFrame) {
         Manager.mainFrame = mainFrame;
@@ -162,5 +162,21 @@ public class Manager {
 
     public static void setNowPlaying(ArrayList<Song> nowPlaying) {
         Manager.nowPlaying = nowPlaying;
+    }
+
+    public static void setNowPlayingSong(Song nowPlayingSong) {
+        if (nowPlayingSong != null)
+            Manager.nowPlayingSong = nowPlayingSong;
+    }
+
+    public static Song getNowPlayingSong() {
+        return nowPlayingSong;
+    }
+
+    public static void calculateNextSong(boolean isRepeat, boolean isShuffle) {
+        //raste kare toe mohammadreza ;)
+        //void gozashtam chon faghat meghdaresho tooye nowPlayingSong zakhire kon
+        //age chizi nabayad pakhsh mishod masalan har do shoon khamoosh boodano be tahe list resid bayad dige play nakone
+        //ke yani null kone meghdare nowPlayingSong ro
     }
 }

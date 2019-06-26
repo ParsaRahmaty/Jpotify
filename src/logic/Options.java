@@ -11,20 +11,20 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 public class Options implements Runnable {
-    JFileChooser fileChooser;
-    File file;
-    FileInputStream input;
-    BufferedInputStream bufferedInput;
-    AdvancedPlayer player;
-    String address;
-    int playedFrames;
-    boolean isPaused;
+    private JFileChooser fileChooser;
+    private FileInputStream input;
+    private BufferedInputStream bufferedInput;
+    private AdvancedPlayer player;
+    private String address;
+    private int playedFrames;
+    private boolean isPaused;
+    private JProgressBar seekBar;
 
-    public Options(String address) {
-//        System.out.println("We are in the constructor of Option...");
+    public Options(String address, JProgressBar seekBar) {
+        this.seekBar = seekBar;
         this.address = address;
         isPaused = false;
-        playedFrames = 0;
+        playedFrames = 1;
         fileChooser = new JFileChooser();
     }
 
@@ -42,7 +42,6 @@ public class Options implements Runnable {
                 if (result == JOptionPane.CLOSED_OPTION || result == JOptionPane.CANCEL_OPTION)
                     return;
                 setAddress(fileChooser.getSelectedFile().getAbsolutePath());
-                System.out.println(this.address);
                 isFileOpened = false;
             }
         }
@@ -54,20 +53,21 @@ public class Options implements Runnable {
         }
         try {
             while (player.play(1)) {
-                South.seekBar.setValue(playedFrames);
                 playedFrames++;
+                this.seekBar.setValue(playedFrames);
                 if (isPaused) {
                     synchronized (player) {
                         player.wait();
                     }
                 }
             }
+            playedFrames++;
+            seekBar.setValue(playedFrames);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         } catch (JavaLayerException e) {
             e.printStackTrace();
         }
-        System.out.println(playedFrames);
     }
 
     public void setAddress(String address) {
@@ -93,20 +93,33 @@ public class Options implements Runnable {
         synchronized (player) {
             boolean isFileOpened = false;
             try {
-                player.close();
-                input = new FileInputStream(new File(this.address));
-                bufferedInput = new BufferedInputStream(input);
-                player = new AdvancedPlayer(bufferedInput);
-                player.play(frame, frame + 1);
+                if (isPaused) {
+                    resumeMusic();
+//                player.close();
+                    input = new FileInputStream(new File(this.address));
+                    bufferedInput = new BufferedInputStream(input);
+                    player = new AdvancedPlayer(bufferedInput);
+                    playedFrames = frame;
+                    this.seekBar.setValue(playedFrames);
+                    player.play(frame, frame + 1);
+                    pauseMusic();
+                }
+                else {
+                    input = new FileInputStream(new File(this.address));
+                    bufferedInput = new BufferedInputStream(input);
+                    player = new AdvancedPlayer(bufferedInput);
+                    playedFrames = frame;
+                    this.seekBar.setValue(playedFrames);
+                    player.play(frame, frame + 1);
+                }
             } catch (FileNotFoundException e) {
                 JOptionPane.showMessageDialog(null, "can't open file, please try again!");
                 int result = fileChooser.showOpenDialog(null);
                 if (result == JOptionPane.CLOSED_OPTION || result == JOptionPane.CANCEL_OPTION)
                     return;
                 setAddress(fileChooser.getSelectedFile().getAbsolutePath());
-                System.out.println(this.address);
                 isFileOpened = false;
-            }catch (JavaLayerException e){
+            } catch (JavaLayerException e) {
                 JOptionPane.showMessageDialog(null, "FATAL ERROR");
             }
         }
