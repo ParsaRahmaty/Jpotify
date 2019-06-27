@@ -1,5 +1,9 @@
 package gui;
 
+import logic.Library;
+import logic.Manager;
+import logic.Playlist;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -12,7 +16,7 @@ import java.util.ArrayList;
 
 public class CenterWestCenter extends JPanel {
 
-    private JButton allPlaylist;
+    private JButton allPlaylists;
     private JButton allSongs;
     private JButton allAlbums;
     private JButton newLibrary;
@@ -24,16 +28,14 @@ public class CenterWestCenter extends JPanel {
     private final Color MY_GRAY = new Color(30, 30, 30);
     private final int ELEMENT_WIDTH;
     private final int ELEMENT_HEIGHT;
-    private ArrayList<Component> myComponents = new ArrayList<>();
 
     public CenterWestCenter() {
         ELEMENT_WIDTH = 145;
         ELEMENT_HEIGHT = 25;
-        setLayout(new BorderLayout());
         this.setLayout(new ModifiedFlowLayout());
         setBackground(MY_GRAY);
-        allLibraries = addLabel("All Libraries", SwingConstants.CENTER, 0);
-        newLibrary = addButton("New Library", "ICON_SOURCE\\plusi", 8, SwingConstants.CENTER, 1);
+        allLibraries = makeLabel("All Libraries", SwingConstants.CENTER);
+        newLibrary = makeButton("New Library", "ICON_SOURCE\\plusi", 8, SwingConstants.CENTER, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
         newLibrary.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -42,27 +44,41 @@ public class CenterWestCenter extends JPanel {
                 FileNameExtensionFilter filter = new FileNameExtensionFilter("*.mp3", "mp3", "mp3");
                 fileChooser.setFileFilter(filter);
                 fileChooser.setDialogTitle("Choose a Path");
-                fileChooser.showOpenDialog(newLibrary);
+                int result = fileChooser.showSaveDialog(newLibrary);
+                File file = fileChooser.getSelectedFile();
+                while (result == JFileChooser.APPROVE_OPTION && file.isFile() && !file.getAbsolutePath().endsWith(".mp3")) {
+                    JOptionPane.showMessageDialog(null, "The selected file should only have mp3 format");
+                    result = fileChooser.showSaveDialog(newLibrary);
+                    file = fileChooser.getSelectedFile();
+                }
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    Library library = new Library(file);
+                    Manager.addLibrary(library);
+                    System.out.println(Manager.getSongs().size());
+                }
             }
         });
-        allSongs = addButton("All Songs", null, 0, SwingConstants.CENTER, 2);
-        allPlaylist = addButton("All Playlist", null, 0, SwingConstants.CENTER, 3);
-        addButton("Heavy Metal", "ICON_SOURCE\\playlisti",  15, SwingConstants.LEFT, 4);
-        addButton("Hard Rock", "ICON_SOURCE\\playlisti", 15, SwingConstants.LEFT, 5);
-        addButton("Favorite", "ICON_SOURCE\\playlisti", 15, SwingConstants.LEFT, 6);
-        newPlaylist = addButton("New Playlist", "ICON_SOURCE\\plusi", 8, SwingConstants.CENTER, 7);
+        allSongs = makeButton("All Songs", null, 0, SwingConstants.CENTER, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
+        allPlaylists = makeButton("All Playlists", null, 0, SwingConstants.CENTER, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
+        newPlaylist = makeButton("New Playlist", "ICON_SOURCE\\plusi", 8, SwingConstants.CENTER, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
         newPlaylist.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 NewPlaylist newPlaylist = new NewPlaylist();
             }
         });
-        allAlbums = addButton("All Albums", null, 0, SwingConstants.CENTER, 8);
-        addButton("Nevermind", "ICON_SOURCE\\albumi", 15, SwingConstants.LEFT, 9);
+        allAlbums = makeButton("All Albums", null, 0, SwingConstants.CENTER, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
         setBounds(0, 0, 130, 0);
+        add(allLibraries, 0);
+        add(newLibrary, 1);
+        add(allSongs, 2);
+        add(allAlbums, 3);
+        add(allPlaylists, 4);
+        add(newPlaylist, 5);
+        addLibrary(new Library(new File("E:\\New Folder")));
     }
 
-    public JButton addButton(String text, String imagePath, int width, int alignment, int index) {
+    private JButton makeButton(String text, String imagePath, int width, int alignment, int buttonWidth, int buttonHeight, boolean shouldFlash) {
         JButton button = new JButton(text);
         button.setBorderPainted(false);
         button.setBackground(MY_GRAY);
@@ -76,12 +92,16 @@ public class CenterWestCenter extends JPanel {
                 public void mouseEntered(MouseEvent e) {
                     super.mouseEntered(e);
                     SwingUsefulMethods.JButtonSetIcon(CenterWestCenter.this, button, imagePath + "b.png", width, width);
+                    if (shouldFlash)
+                        button.setBackground(new Color(43, 43, 43));
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
                     super.mouseExited(e);
                     SwingUsefulMethods.JButtonSetIcon(CenterWestCenter.this, button, imagePath + ".png", width, width);
+                    if (shouldFlash)
+                        button.setBackground(MY_GRAY);
                 }
             });
         } else {
@@ -90,36 +110,42 @@ public class CenterWestCenter extends JPanel {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     super.mouseEntered(e);
-                    button.setBackground(new Color(43, 43, 43));
+                    if (shouldFlash)
+                        button.setBackground(new Color(43, 43, 43));
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
                     super.mouseExited(e);
-                    button.setBackground(MY_GRAY);
+                    if (shouldFlash)
+                        button.setBackground(MY_GRAY);
                 }
             });
         }
-        button.setPreferredSize(new Dimension(ELEMENT_WIDTH, ELEMENT_HEIGHT));
+        button.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
         button.setHorizontalAlignment(alignment);
-        myComponents.add(index, button);
-        this.add(button, index);
         return button;
     }
 
-    public JLabel addLabel(String text, int alignment, int index) {
+    private JLabel makeLabel(String text, int alignment) {
         JLabel label = new JLabel(text);
         label.setFont(FONT1);
         label.setBackground(MY_GRAY);
         label.setForeground(Color.GRAY);
         label.setPreferredSize(new Dimension(ELEMENT_WIDTH, ELEMENT_HEIGHT));
         label.setHorizontalAlignment(alignment);
-        myComponents.add(index, label);
-        this.add(label, index);
         return label;
     }
 
-    public ArrayList<Component> getMyComponents() {
-        return myComponents;
+    private void addLibrary(Library library) {
+        JPanel panel = new JPanel();
+        add(panel, 1);
+        panel.setBackground(Color.WHITE);
+        panel.setLayout(new BorderLayout());
+        panel.setPreferredSize(new Dimension(ELEMENT_WIDTH, ELEMENT_HEIGHT));
+        JButton button = makeButton(library.getPath().substring(library.getPath().lastIndexOf("\\") + 1), "ICON_SOURCE\\libraryi", 15, SwingConstants.LEFT, ELEMENT_WIDTH - 25, ELEMENT_HEIGHT, true);
+        panel.add(button, BorderLayout.CENTER);
+        JButton removeButton = makeButton("", "ICON_SOURCE\\removei", 15, SwingConstants.CENTER, 25, ELEMENT_HEIGHT, false);
+        panel.add(removeButton, BorderLayout.EAST);
     }
 }

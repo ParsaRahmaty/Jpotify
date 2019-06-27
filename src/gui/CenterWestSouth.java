@@ -14,10 +14,8 @@ import java.io.IOException;
 public class CenterWestSouth extends JPanel {
     private final Color MY_GRAY = new Color(30, 30, 30);
     private JLabel label = new JLabel();
-    private BufferedImage currentSongImage;
 
     public CenterWestSouth() throws IOException {
-        changeImage();
         setLayout(new FlowLayout());
         changeImage();
         label.setBackground(MY_GRAY);

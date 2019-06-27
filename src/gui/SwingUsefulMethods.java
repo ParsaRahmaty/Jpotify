@@ -24,8 +24,6 @@ public class SwingUsefulMethods {
     public static void paintScrollPane(JScrollPane scrollPane, Color arrowColor, Color barColor, Color backgroundColor) {
         UIManager.put("ScrollBar.thumb", new ColorUIResource(arrowColor));
 
-        scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() );
-        scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI());
         scrollPane.getVerticalScrollBar().setBackground(backgroundColor);
 
         scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {

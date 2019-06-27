@@ -6,9 +6,13 @@ import logic.Song;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.plaf.basic.BasicMenuUI;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 
 public class South extends JPanel {
     private JButton playPauseButton;
@@ -19,7 +23,7 @@ public class South extends JPanel {
     private JButton listButton;
     private JButton windowButton;
     private JButton compactMode;
-    public static JProgressBar seekBar = new JProgressBar();;
+    private JProgressBar seekBar = new JProgressBar();
     private JSlider volume;
     private JLabel songName;
     private JLabel albumName;
@@ -32,17 +36,18 @@ public class South extends JPanel {
     private boolean isListed = false;
     private boolean isCompact = false;
 
-    private Options options = new Options("E:\\4.mp3", seekBar);
-    private Thread t = new Thread(options);
+    private Options options;
+    private Thread logicThread;
 
     private final Font FONT2 = new Font("Microsoft Sans Serif", Font.PLAIN, 9);
     private final Font FONT3 = new Font("Microsoft Sans Serif", Font.BOLD, 11);
     private final Color MY_GRAY = new Color(30, 30, 30);
 
+    public static JLabel elapsed = new JLabel();
 
     public South(String songName, String albumName, String artistName) {
-        t.start();
-        Manager.setNowPlayingSong(new Song("E:\\4.mp3")); //Edited
+        playSong("E:\\8.mp3");
+        Manager.setNowPlayingSong(new Song("E:\\8.mp3")); //Edited
 
         setLayout(new BorderLayout());
         setBackground(MY_GRAY);
@@ -51,7 +56,7 @@ public class South extends JPanel {
         add(leftPanel, BorderLayout.WEST);
         leftPanel.setBackground(MY_GRAY);
         leftPanel.setLayout(null);
-        leftPanel.setPreferredSize(new Dimension(200, 70));
+        leftPanel.setPreferredSize(new Dimension(150, 70));
         this.songName = new JLabel(songName);
         this.albumName = new JLabel(albumName);
         this.artistName = new JLabel(artistName);
@@ -64,9 +69,9 @@ public class South extends JPanel {
         leftPanel.add(this.songName);
         leftPanel.add(this.albumName);
         leftPanel.add(this.artistName);
-        this.songName.setBounds(10, 9, 200, 15);
-        this.albumName.setBounds(10, 22, 200, 15);
-        this.artistName.setBounds(10, 47, 200, 15);
+        this.songName.setBounds(10, 9, 140, 15);
+        this.albumName.setBounds(10, 22, 140, 15);
+        this.artistName.setBounds(10, 47, 140, 15);
 
         JPanel centerPanel = new JPanel();
         add(centerPanel, BorderLayout.CENTER);
@@ -98,8 +103,14 @@ public class South extends JPanel {
             SwingUsefulMethods.JButtonSetIcon(this, playPauseButton, "ICON_SOURCE\\pausei.png", 30, 30);
         playPauseButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
+            public void mouseReleased(MouseEvent e) {
+                super.mouseReleased(e);
+                if (seekBar.getValue() == seekBar.getMaximum()){
+                    if (!isPlaying){
+                        seekBar.setValue(0);
+                        playSong(Manager.getNowPlayingSong().getFilePath());
+                    }
+                }
                 if (!isPlaying) {
                     isPlaying = true;
                     options.resumeMusic();
@@ -255,19 +266,29 @@ public class South extends JPanel {
         seekBar.setBackground(new Color(70, 70, 70));
         centerPanel.add(seekBar, BorderLayout.CENTER);
         seekBar.setForeground(Color.WHITE);
-        seekBar.setMaximum(Manager.getNowPlayingSong().getMp3File().getFrameCount());//newly added
+        seekBar.setMaximum(Manager.getNowPlayingSong().getMp3File().getFrameCount() - 1);//new//fucking changed
         seekBar.setMinimum(0);//newly added
         seekBar.setValue(0);//newly added
         seekBar.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
+            public void mouseReleased(MouseEvent e) {
+                super.mouseReleased(e);
                 double x = e.getX();
                 double seekBarWidth = seekBar.getWidth();
                 double result = x / seekBarWidth;
-                double ans = result * Manager.getNowPlayingSong().getMp3File().getFrameCount();//900 is the frame length of this specific music
-                options.seek((int)ans);
-                seekBar.setValue((int) ans);
+                double ans = result * Manager.getNowPlayingSong().getMp3File().getFrameCount();
+
+                if (seekBar.getValue() == seekBar.getMaximum()){
+                    super.mouseClicked(e);
+                    playSong(Manager.getNowPlayingSong().getFilePath());
+                    options.seek((int) ans);
+                    seekBar.setValue((int) ans);
+                }
+                else {
+                    super.mouseClicked(e);
+                    options.seek((int) ans);
+                    seekBar.setValue((int) ans);
+                }
             }
 
             @Override
@@ -291,6 +312,24 @@ public class South extends JPanel {
         volume.setBackground(MY_GRAY);
         volume.setFocusable(false);
         rightPanel.add(volume, BorderLayout.CENTER);
+        setSystemVolume(20);//new
+        volume.setValue(20);//new
+        volume.addMouseListener(new MouseAdapter() {//new
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                super.mouseReleased(e);
+                double x = e.getX();
+                if (x <= 0)
+                    x = 0;
+                if(x >= 110)
+                    x = 110;
+                double volumeWidth = volume.getWidth();
+                double result = x / volumeWidth;
+                double ans = result * 100;
+                volume.setValue((int) ans);
+                setSystemVolume((int) ans);
+            }
+        });
 
         JPanel empty1 = new JPanel();
         empty1.setBackground(MY_GRAY);
@@ -454,16 +493,31 @@ public class South extends JPanel {
         empty3.setPreferredSize(new Dimension(10, 0));
 
         timeElapsed = new MusicTime();
-        JLabel elapsed = new JLabel(timeElapsed.toString() + "  ");
+//        JLabel elapsed = new JLabel(timeElapsed.toString() + "  ");
         elapsed.setFont(FONT2);
         elapsed.setForeground(Color.WHITE);
         centerPanel.add(elapsed, BorderLayout.WEST);
 
-        timeTotal = new MusicTime();
+        timeTotal = new MusicTime();//new
+        timeTotal.setValue((int) Manager.getNowPlayingSong().getMp3File().getLengthInSeconds());//new
         JLabel total = new JLabel("  " + timeTotal.toString());
         total.setFont(FONT2);
         total.setForeground(Color.WHITE);
         centerPanel.add(total, BorderLayout.EAST);
+
+        changeSong();
+    }
+
+    public void playSong(String address){
+        options = new Options(address, seekBar);
+        logicThread = new Thread(options);
+        logicThread.start();
+        Manager.setNowPlayingSong(new Song(address));
+    }
+    public void changeSong(){
+        setAlbumName(Manager.getNowPlayingSong().getAlbumName());
+        setArtistName(Manager.getNowPlayingSong().getArtistName());
+        setSongName(Manager.getNowPlayingSong().getSongName());
     }
 
     public void setSongName(String songName) {
@@ -479,5 +533,33 @@ public class South extends JPanel {
     public void setArtistName(String artistName) {
         if (artistName != null)
             this.artistName.setText(artistName);
+    }
+
+    public MusicTime getTimeElapsed() {
+        return timeElapsed;
+    }
+
+    public void setSystemVolume(int volume) {
+        if(volume < 0 || volume > 100)
+        {
+            throw new RuntimeException("Error: " + volume + " is not a valid number. Choose a number between 0 and 100");
+        }
+
+        else
+        {
+            double endVolume = 655.35 * volume;
+
+            Runtime rt = Runtime.getRuntime();
+            Process pr;
+            try
+            {
+                pr = rt.exec("voice setting\\nircmd.exe" + " setsysvolume " + endVolume);
+                pr = rt.exec("voice setting\\nircmd.exe" + " mutesysvolume 0");
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -48,7 +48,7 @@ public class NewPlaylist extends JFrame {
             button.setBackground(MY_GRAY);
             button.setFocusPainted(false);
             button.setFont(FONT2);
-            button.setForeground(Color.WHITE);
+//            button.setForeground(Color.WHITE);
             button.setBounds(245, 25, 25, 25);
             add(button, BorderLayout.EAST);
             SwingUsefulMethods.JButtonSetIcon(this, button, "ICON_SOURCE\\ticki.png", 20, 20);
@@ -74,6 +74,11 @@ public class NewPlaylist extends JFrame {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     isOpen = false;
+                    try {
+                        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+                        ex.printStackTrace();
+                    }
                     NewPlaylist.this.dispose();
                 }
             });

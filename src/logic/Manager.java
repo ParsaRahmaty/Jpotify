@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Manager {
     public static MainFrame mainFrame;
@@ -15,6 +16,7 @@ public class Manager {
     public static ArrayList<Library> libraries = new ArrayList<>();
     public static ArrayList<Song> nowPlaying = new ArrayList<>();
     public static Song nowPlayingSong;
+    public static ArrayList<Song> shufflingSongs;
 
     public static void setMainFrame(MainFrame mainFrame) {
         Manager.mainFrame = mainFrame;
@@ -46,7 +48,7 @@ public class Manager {
 
     public static void makeAndAddSong(String filePath) {
         Song newSong = new Song(filePath);
-        if (newSong.getMp3File() != null) {
+        if (newSong.getMp3File() != null && !songs.contains(newSong)) {
             songs.add(newSong);
             boolean doesAlbumExist = false;
             for (Album album : albums) {
@@ -112,6 +114,8 @@ public class Manager {
     public static void addPlaylist(Playlist playlist) {
         if (!playlists.contains(playlist)) {
             playlists.add(playlist);
+        } else {
+            JOptionPane.showMessageDialog(null, "You can't have two playlists with the same name\nPlease choose a different name");
         }
     }
 
@@ -125,6 +129,8 @@ public class Manager {
         if (!libraries.contains(library)) {
             libraries.add(library);
             importLibrarySongs(library);
+        } else {
+            JOptionPane.showMessageDialog(null, "The library was already added before");
         }
     }
 
@@ -149,11 +155,7 @@ public class Manager {
                         makeAndAddSong(library.getPath() + "\\" + mp3Name);
                 }
             } else {
-                for (Song song : Manager.getSongs()) {
-                    if (song.getFilePath().equals(library.getPath())) {
-                        makeAndAddSong(library.getPath());
-                    }
-                }
+                makeAndAddSong(library.getPath());
             }
         } else {
             removeLibrary(library);
@@ -174,9 +176,34 @@ public class Manager {
     }
 
     public static void calculateNextSong(boolean isRepeat, boolean isShuffle) {
+        shufflingSongs = null;
+        if (isShuffle) {
+            if (isRepeat){
+                int randomShuffle = randomGenerator(nowPlaying.size());
+                nowPlayingSong = nowPlaying.get(randomShuffle);
+            }
+            else {
+                shufflingSongs = new ArrayList<>();//new
+                shufflingSongs = nowPlaying;
+                int randomShuffle = randomGenerator(shufflingSongs.size());
+                nowPlayingSong = shufflingSongs.get(randomShuffle);
+                shufflingSongs.remove(randomShuffle);
+                if (shufflingSongs.size() == 0)
+                    nowPlayingSong = null;
+            }
+        } else {
+            if (!isRepeat) {
+                nowPlayingSong = nowPlaying.get(nowPlaying.indexOf(nowPlayingSong) + 1);
+            }
+        }
         //raste kare toe mohammadreza ;)
         //void gozashtam chon faghat meghdaresho tooye nowPlayingSong zakhire kon
         //age chizi nabayad pakhsh mishod masalan har do shoon khamoosh boodano be tahe list resid bayad dige play nakone
         //ke yani null kone meghdare nowPlayingSong ro
+    }//new
+
+    public static int randomGenerator(int bound) {
+        Random random = new Random(8585);//ezzz:)
+        return random.nextInt(bound);
     }
 }

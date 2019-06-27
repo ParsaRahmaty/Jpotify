@@ -8,7 +8,6 @@ public class Library implements Serializable {
     private boolean isDirectory;
 
     public Library(File file) {
-        //add library
         this.path = file.getAbsolutePath();
         isDirectory = file.isDirectory();
     }

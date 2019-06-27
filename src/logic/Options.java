@@ -1,5 +1,6 @@
 package logic;
 
+import gui.MusicTime;
 import gui.South;
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.advanced.AdvancedPlayer;
@@ -53,8 +54,18 @@ public class Options implements Runnable {
         }
         try {
             while (player.play(1)) {
-                playedFrames++;
+                long coefficient = Manager.getNowPlayingSong().getMp3File().getFrameCount() / Manager.getNowPlayingSong().getMp3File().getLengthInSeconds();
+                Manager.getMainFrame().getSouth().getTimeElapsed().setValue(playedFrames / (int) coefficient);
+                South.elapsed.setText(Manager.getMainFrame().getSouth().getTimeElapsed().toString() + " ");
+//                South.elapsed.setText(Integer.toString(playedFrames / (int)coefficient));//new
+                if (playedFrames / (int) coefficient >= Manager.getNowPlayingSong().getMp3File().getLengthInSeconds()) {
+                    Manager.getMainFrame().getSouth().getTimeElapsed().setValue((int) Manager.getNowPlayingSong().getMp3File().getLengthInSeconds());
+                    South.elapsed.setText(Manager.getMainFrame().getSouth().getTimeElapsed().toString() + " ");
+                }
+//                South.elapsed.setText(South.timeElapsed.toString() + " ");
+
                 this.seekBar.setValue(playedFrames);
+                playedFrames++;
                 if (isPaused) {
                     synchronized (player) {
                         player.wait();
@@ -63,6 +74,8 @@ public class Options implements Runnable {
             }
             playedFrames++;
             seekBar.setValue(playedFrames);
+            if (seekBar.getValue() == seekBar.getMaximum())
+                isPaused = true;
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         } catch (JavaLayerException e) {
@@ -123,5 +136,10 @@ public class Options implements Runnable {
                 JOptionPane.showMessageDialog(null, "FATAL ERROR");
             }
         }
+    }
+
+
+    public boolean isPaused() {
+        return isPaused;
     }
 }

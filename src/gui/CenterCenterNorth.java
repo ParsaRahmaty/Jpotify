@@ -1,5 +1,7 @@
 package gui;
 
+import logic.Manager;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -22,7 +24,7 @@ public class CenterCenterNorth extends JPanel {
     public CenterCenterNorth() {
         setLayout(new BorderLayout());
         setBackground(MY_GRAY);
-        button = new JButton("Mohammadreza Dorudian");
+        button = new JButton(Manager.getMainFrame().getUsername());
         add(button, BorderLayout.EAST);
         button.setFont(FONT1);
         button.setBorderPainted(false);
