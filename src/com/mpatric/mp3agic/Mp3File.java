@@ -2,6 +2,7 @@ package com.mpatric.mp3agic;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.*;
@@ -9,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.EnumSet;
 
-public class Mp3File extends FileWrapper {
+public class Mp3File extends FileWrapper implements Serializable {
 
 	private static final int DEFAULT_BUFFER_LENGTH = 65536;
 	private static final int MINIMUM_BUFFER_LENGTH = 40;
@@ -22,7 +23,7 @@ public class Mp3File extends FileWrapper {
 	private int startOffset = -1;
 	private int endOffset = -1;
 	private int frameCount = 0;
-	private Map<Integer, MutableInteger> bitrates = new HashMap<>();
+	private transient Map<Integer, MutableInteger> bitrates = new HashMap<>();
 	private int xingBitrate;
 	private double bitrate = 0;
 	private String channelMode;
@@ -269,7 +270,9 @@ public class Mp3File extends FileWrapper {
 
 	private void initId3v1Tag(SeekableByteChannel seekableByteChannel) throws IOException {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(ID3v1Tag.TAG_LENGTH);
-		seekableByteChannel.position(getLength() - ID3v1Tag.TAG_LENGTH);
+		try {
+			seekableByteChannel.position(getLength() - ID3v1Tag.TAG_LENGTH);
+		} catch (Exception ignored) {}
 		byteBuffer.clear();
 		int bytesRead = seekableByteChannel.read(byteBuffer);
 		if (bytesRead < ID3v1Tag.TAG_LENGTH) throw new IOException("Not enough bytes read");

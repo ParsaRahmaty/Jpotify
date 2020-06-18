@@ -25,7 +25,7 @@ public class Library implements Serializable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof Song)) {
+        if (!(obj instanceof Library)) {
             return false;
         }
         if (path.equals(((Library) obj).getPath())) {

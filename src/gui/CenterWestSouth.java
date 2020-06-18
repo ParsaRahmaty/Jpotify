@@ -26,10 +26,10 @@ public class CenterWestSouth extends JPanel {
 
     public void changeImage() throws IOException {
         BufferedImage img;
-        if (Manager.getNowPlayingSong() == null || (Manager.getNowPlayingSong() != null && Manager.getNowPlayingSong().getImage() == null))
+        if (Manager.getInstance().getNowPlayingSong() == null || (Manager.getInstance().getNowPlayingSong() != null && Manager.getInstance().getNowPlayingSong().getImage() == null))
             img = ImageIO.read(getClass().getResource("ICON_SOURCE\\default130.jpg"));
         else
-            img = Manager.getNowPlayingSong().getImage();
+            img = Manager.getInstance().getNowPlayingSong().getImage();
         try {
             BufferedImage finalImg = new BufferedImage(130, 130, img.getType());
             Graphics2D graphics2D = finalImg.createGraphics();

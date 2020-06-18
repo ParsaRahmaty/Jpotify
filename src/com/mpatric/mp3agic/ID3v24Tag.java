@@ -1,6 +1,8 @@
 package com.mpatric.mp3agic;
 
-public class ID3v24Tag extends AbstractID3v2Tag {
+import java.io.Serializable;
+
+public class ID3v24Tag extends AbstractID3v2Tag implements Serializable {
 
 	public static final String VERSION = "4.0";
 

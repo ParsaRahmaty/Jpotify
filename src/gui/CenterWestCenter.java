@@ -3,8 +3,10 @@ package gui;
 import logic.Library;
 import logic.Manager;
 import logic.Playlist;
+import logic.Song;
 
 import javax.imageio.ImageIO;
+import javax.management.MalformedObjectNameException;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -19,9 +21,15 @@ public class CenterWestCenter extends JPanel {
     private JButton allPlaylists;
     private JButton allSongs;
     private JButton allAlbums;
+    private JButton nowPlaying;
     private JButton newLibrary;
     private JButton newPlaylist;
     private JLabel allLibraries;
+    private JButton favorite;
+    private ArrayList<JButton> libraries = new ArrayList<>();
+    private ArrayList<JButton> trashCans = new ArrayList<>();
+
+    private Playlist favoritePlaylist = new Playlist("Favorite");
 
     private final Font FONT1 = new Font("Microsoft Sans Serif", Font.BOLD, 10);
     private final Font FONT2 = new Font("Microsoft Sans Serif", Font.PLAIN, 11);
@@ -36,6 +44,7 @@ public class CenterWestCenter extends JPanel {
         setBackground(MY_GRAY);
         allLibraries = makeLabel("All Libraries", SwingConstants.CENTER);
         newLibrary = makeButton("New Library", "ICON_SOURCE\\plusi", 8, SwingConstants.CENTER, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
+        newLibrary.setLayout(new BorderLayout());
         newLibrary.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -53,13 +62,41 @@ public class CenterWestCenter extends JPanel {
                 }
                 if (result == JFileChooser.APPROVE_OPTION) {
                     Library library = new Library(file);
-                    Manager.addLibrary(library);
-                    System.out.println(Manager.getSongs().size());
+                    Manager.getInstance().addLibrary(library);
+                    ImportLibrary importLibrary = new ImportLibrary(library, false);
+                    importLibrary.start();
+                    JLabel libraryIsBeingAdded;
+                    libraryIsBeingAdded = makeLabel("Library Is Being Added...", SwingConstants.CENTER);
+                    add(libraryIsBeingAdded, Manager.getInstance().getLibraries().size());
+                    setVisible(false);
+                    setVisible(true);
                 }
             }
         });
         allSongs = makeButton("All Songs", null, 0, SwingConstants.CENTER, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
+        allSongs.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().setAddablesToAllSongs();
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().refresh(null);
+            }
+        });
+        nowPlaying = makeButton("Now Playing", null, 0, SwingConstants.CENTER, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
+        nowPlaying.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().setAddablesToNowPlaying();
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().refresh(null);
+            }
+        });
         allPlaylists = makeButton("All Playlists", null, 0, SwingConstants.CENTER, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
+        allPlaylists.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().setAddablesToAllPlaylists();
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().refresh(null);
+            }
+        });
         newPlaylist = makeButton("New Playlist", "ICON_SOURCE\\plusi", 8, SwingConstants.CENTER, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
         newPlaylist.addActionListener(new ActionListener() {
             @Override
@@ -68,14 +105,31 @@ public class CenterWestCenter extends JPanel {
             }
         });
         allAlbums = makeButton("All Albums", null, 0, SwingConstants.CENTER, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
+        allAlbums.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().setAddablesToAllAlbums();
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().refresh(null);
+            }
+        });
+        Manager.getInstance().addPlaylistWithoutMessages(favoritePlaylist);
+        favorite = makeButton("Favorite", "ICON_SOURCE\\playlisti", 15, SwingConstants.LEFT, ELEMENT_WIDTH, ELEMENT_HEIGHT, true);
+        favorite.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().setAddables(favoritePlaylist);
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().refresh(favoritePlaylist);
+            }
+        });
         setBounds(0, 0, 130, 0);
         add(allLibraries, 0);
         add(newLibrary, 1);
         add(allSongs, 2);
         add(allAlbums, 3);
         add(allPlaylists, 4);
-        add(newPlaylist, 5);
-        addLibrary(new Library(new File("E:\\New Folder")));
+        add(nowPlaying, 5);
+        add(favorite, 6);
+        add(newPlaylist, 7);
     }
 
     private JButton makeButton(String text, String imagePath, int width, int alignment, int buttonWidth, int buttonHeight, boolean shouldFlash) {
@@ -137,15 +191,136 @@ public class CenterWestCenter extends JPanel {
         return label;
     }
 
-    private void addLibrary(Library library) {
+    public void addLibrary(Library library) {
         JPanel panel = new JPanel();
-        add(panel, 1);
-        panel.setBackground(Color.WHITE);
+        add(panel, Manager.getInstance().getLibraries().size());
+        panel.setBackground(MY_GRAY);
         panel.setLayout(new BorderLayout());
         panel.setPreferredSize(new Dimension(ELEMENT_WIDTH, ELEMENT_HEIGHT));
-        JButton button = makeButton(library.getPath().substring(library.getPath().lastIndexOf("\\") + 1), "ICON_SOURCE\\libraryi", 15, SwingConstants.LEFT, ELEMENT_WIDTH - 25, ELEMENT_HEIGHT, true);
-        panel.add(button, BorderLayout.CENTER);
-        JButton removeButton = makeButton("", "ICON_SOURCE\\removei", 15, SwingConstants.CENTER, 25, ELEMENT_HEIGHT, false);
-        panel.add(removeButton, BorderLayout.EAST);
+        JButton button = makeButton(library.getPath().substring(library.getPath().lastIndexOf("\\") + 1), "ICON_SOURCE\\libraryi", 15, SwingConstants.LEFT, ELEMENT_WIDTH - 30, ELEMENT_HEIGHT, true);
+        libraries.add(button);
+        panel.add(button, BorderLayout.WEST);
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int ans = JOptionPane.showConfirmDialog(null, "Do you want to refresh the " + library.getPath().substring(library.getPath().lastIndexOf("\\") + 1) + " library?\nDoing so will refresh the time of last played for all the songs related to the library.");
+                if (ans == JOptionPane.YES_OPTION) {
+                    Manager.getInstance().removeLibrarySongs(library);
+                    Manager.getInstance().removeLibrary(library);
+                    remove(panel);
+                    Manager.getInstance().addLibrary(library);
+                    ImportLibrary importLibrary = new ImportLibrary(library, true);
+                    importLibrary.start();
+                    JLabel libraryRefreshing;
+                    libraryRefreshing = makeLabel("Library Refreshing...", SwingConstants.CENTER);
+                    add(libraryRefreshing, Manager.getInstance().getLibraries().size());
+                    setVisible(false);
+                    setVisible(true);
+                }
+            }
+        });
+        JButton removeButton = makeButton("", "ICON_SOURCE\\removei", 15, SwingConstants.CENTER, ELEMENT_HEIGHT, ELEMENT_HEIGHT, false);
+        panel.add(removeButton, BorderLayout.CENTER);
+        JPanel empty = new JPanel();
+        empty.setBackground(MY_GRAY);
+        empty.setLayout(new BorderLayout());
+        empty.setPreferredSize(new Dimension(15, ELEMENT_HEIGHT));
+        panel.add(empty, BorderLayout.EAST);
+        setVisible(false);
+        setVisible(true);
+        trashCans.add(removeButton);
+        removeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int ans = JOptionPane.showConfirmDialog(removeButton, "Are you sure you want to remove this library?");
+                if (ans == JOptionPane.YES_OPTION) {
+                    Manager.getInstance().removeLibrarySongs(library);
+                    Manager.getInstance().removeLibrary(library);
+                    remove(panel);
+                    libraries.remove(button);
+                    trashCans.remove(removeButton);
+                    setVisible(false);
+                    setVisible(true);
+                }
+            }
+        });
+    }
+
+    public void addPlaylist(Playlist playlist) {
+        JPanel panel = new JPanel();
+        add(panel, 7 + Manager.getInstance().getLibraries().size());
+        panel.setBackground(MY_GRAY);
+        panel.setLayout(new BorderLayout());
+        panel.setPreferredSize(new Dimension(ELEMENT_WIDTH, ELEMENT_HEIGHT));
+        JButton button = makeButton(playlist.getName(), "ICON_SOURCE\\playlisti", 15, SwingConstants.LEFT, ELEMENT_WIDTH - 55, ELEMENT_HEIGHT, true);
+        panel.add(button, BorderLayout.WEST);
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().setAddables(playlist);
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().refresh(playlist);
+            }
+        });
+        JButton removeButton = makeButton("", "ICON_SOURCE\\removei", 15, SwingConstants.CENTER, 20, ELEMENT_HEIGHT, false);
+        JButton renameButton = makeButton("", "ICON_SOURCE\\renamei", 15, SwingConstants.CENTER, 20, ELEMENT_HEIGHT, false);
+        JPanel center = new JPanel();
+        panel.add(center, BorderLayout.CENTER);
+        center.setBackground(MY_GRAY);
+        center.setLayout(new BorderLayout());
+        center.setPreferredSize(new Dimension(50, ELEMENT_HEIGHT));
+        center.add(removeButton, BorderLayout.EAST);
+        center.add(renameButton, BorderLayout.CENTER);
+        JPanel empty = new JPanel();
+        empty.setBackground(MY_GRAY);
+        empty.setLayout(new BorderLayout());
+        empty.setPreferredSize(new Dimension(15, ELEMENT_HEIGHT));
+        panel.add(empty, BorderLayout.EAST);
+        setVisible(false);
+        setVisible(true);
+        removeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int ans = JOptionPane.showConfirmDialog(null, "Are you sure you want to remove this playlist?");
+                if (ans == JOptionPane.YES_OPTION) {
+                    Manager.getInstance().removePlaylist(playlist);
+                    Manager.getInstance().getMainFrame().getCenterCenterCenter().refresh(Manager.getInstance().getMainFrame().getCenterCenterCenter().getPlaylist());
+                    remove(panel);
+                    setVisible(false);
+                    setVisible(true);
+                }
+            }
+        });
+        renameButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                RenamePlaylist renamePlaylist = new RenamePlaylist(playlist, button);
+            }
+        });
+    }
+
+    public void disableButtons () {
+        for (JButton value : libraries) {
+            value.setEnabled(false);
+        }
+        for (JButton value : trashCans) {
+            value.setEnabled(false);
+        }
+    }
+
+    public void enableButtons () {
+        for (JButton value : libraries) {
+            value.setEnabled(true);
+        }
+        for (JButton value : trashCans) {
+            value.setEnabled(true);
+        }
+    }
+
+    public Playlist getFavoritePlaylist() {
+        return favoritePlaylist;
+    }
+
+    public void setFavoritePlaylist(Playlist favoritePlaylist) {
+        this.favoritePlaylist = favoritePlaylist;
     }
 }

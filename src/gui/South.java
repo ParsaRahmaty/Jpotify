@@ -8,11 +8,19 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.basic.BasicMenuUI;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * this class fixed and shows the bottom part of the gui and it has a seek bar, next song, perivious song
+ * pause and play, and a slider to change the volume of them music and the system
+ */
 
 public class South extends JPanel {
     private JButton playPauseButton;
@@ -28,13 +36,16 @@ public class South extends JPanel {
     private JLabel songName;
     private JLabel albumName;
     private JLabel artistName;
+    private JLabel total;
+    private JLabel elapsed = new JLabel();
     private MusicTime timeElapsed;
-    private MusicTime timeTotal;
-    private boolean isPlaying = true;
+    private MusicTime timeTotal = new MusicTime();
+    private boolean isPlaying = false;
     private boolean isShuffle = false;
     private boolean isRepeat = false;
     private boolean isListed = false;
     private boolean isCompact = false;
+    private boolean isStarted = false;
 
     private Options options;
     private Thread logicThread;
@@ -43,12 +54,7 @@ public class South extends JPanel {
     private final Font FONT3 = new Font("Microsoft Sans Serif", Font.BOLD, 11);
     private final Color MY_GRAY = new Color(30, 30, 30);
 
-    public static JLabel elapsed = new JLabel();
-
-    public South(String songName, String albumName, String artistName) {
-        playSong("E:\\8.mp3");
-        Manager.setNowPlayingSong(new Song("E:\\8.mp3")); //Edited
-
+    public South() {
         setLayout(new BorderLayout());
         setBackground(MY_GRAY);
 
@@ -57,9 +63,9 @@ public class South extends JPanel {
         leftPanel.setBackground(MY_GRAY);
         leftPanel.setLayout(null);
         leftPanel.setPreferredSize(new Dimension(150, 70));
-        this.songName = new JLabel(songName);
-        this.albumName = new JLabel(albumName);
-        this.artistName = new JLabel(artistName);
+        this.songName = new JLabel();
+        this.albumName = new JLabel();
+        this.artistName = new JLabel();
         this.songName.setFont(FONT3);
         this.albumName.setFont(FONT2);
         this.artistName.setFont(FONT2);
@@ -97,6 +103,7 @@ public class South extends JPanel {
         playPauseButton.setBorderPainted(false);
         playPauseButton.setFocusPainted(false);
         playPauseButton.setBorder(new BevelBorder(BevelBorder.RAISED, MY_GRAY, MY_GRAY));
+        playPauseButton.setContentAreaFilled(false);
         if (!isPlaying)
             SwingUsefulMethods.JButtonSetIcon(this, playPauseButton, "ICON_SOURCE\\playi.png", 30, 30);
         else
@@ -105,20 +112,26 @@ public class South extends JPanel {
             @Override
             public void mouseReleased(MouseEvent e) {
                 super.mouseReleased(e);
-                if (seekBar.getValue() == seekBar.getMaximum()){
-                    if (!isPlaying){
-                        seekBar.setValue(0);
-                        playSong(Manager.getNowPlayingSong().getFilePath());
+                if (seekBar.getValue() == seekBar.getMaximum()) {
+                    if (!isPlaying) {
+                        Manager.getInstance().calculateNextSong(isRepeat, isShuffle);
+                        startSong();
                     }
-                }
-                if (!isPlaying) {
-                    isPlaying = true;
-                    options.resumeMusic();
-                    SwingUsefulMethods.JButtonSetIcon(South.this, playPauseButton, "ICON_SOURCE\\pauseib.png", 30, 30);
                 } else {
-                    isPlaying = false;
-                    options.pauseMusic();
-                    SwingUsefulMethods.JButtonSetIcon(South.this, playPauseButton, "ICON_SOURCE\\playib.png", 30, 30);
+                    if (!isPlaying) {
+                        isPlaying = true;
+                        SwingUsefulMethods.JButtonSetIcon(South.this, playPauseButton, "ICON_SOURCE\\pauseib.png", 30, 30);
+                        if (options != null) {
+                            options.resumeMusic();
+                        } else {
+                            startSong();
+                        }
+                    } else {
+                        isPlaying = false;
+                        SwingUsefulMethods.JButtonSetIcon(South.this, playPauseButton, "ICON_SOURCE\\playib.png", 30, 30);
+                        if (options != null)
+                            options.pauseMusic();
+                    }
                 }
             }
 
@@ -218,6 +231,10 @@ public class South extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (Manager.getInstance().getNowPlaying().size() > 0) {
+                    Manager.getInstance().calculateNextSong(isRepeat, isShuffle);
+                    startSong();
+                }
             }
 
             @Override
@@ -242,6 +259,8 @@ public class South extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                Manager.getInstance().getPreviousSong();
+                startSong();
             }
 
             @Override
@@ -256,6 +275,7 @@ public class South extends JPanel {
                 SwingUsefulMethods.JButtonSetIcon(South.this, previousSongButton, "ICON_SOURCE\\previousi.png", 15, 15);
             }
         });
+
         JPanel panel = new JPanel();
         panel.setLayout(null);
         panel.setPreferredSize(new Dimension(100, 10));
@@ -266,28 +286,32 @@ public class South extends JPanel {
         seekBar.setBackground(new Color(70, 70, 70));
         centerPanel.add(seekBar, BorderLayout.CENTER);
         seekBar.setForeground(Color.WHITE);
-        seekBar.setMaximum(Manager.getNowPlayingSong().getMp3File().getFrameCount() - 1);//new//fucking changed
-        seekBar.setMinimum(0);//newly added
-        seekBar.setValue(0);//newly added
         seekBar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 super.mouseReleased(e);
-                double x = e.getX();
-                double seekBarWidth = seekBar.getWidth();
-                double result = x / seekBarWidth;
-                double ans = result * Manager.getNowPlayingSong().getMp3File().getFrameCount();
+                if (isStarted) {
+                    double x = e.getX();
+                    if (x < 0)
+                        x = 0.0;
+                    double seekBarWidth = seekBar.getWidth();
+                    double result = x / seekBarWidth;
+                    double ans = result * Manager.getInstance().getNowPlayingSong().getMp3File().getFrameCount();
 
-                if (seekBar.getValue() == seekBar.getMaximum()){
-                    super.mouseClicked(e);
-                    playSong(Manager.getNowPlayingSong().getFilePath());
-                    options.seek((int) ans);
-                    seekBar.setValue((int) ans);
-                }
-                else {
-                    super.mouseClicked(e);
-                    options.seek((int) ans);
-                    seekBar.setValue((int) ans);
+                    if (seekBar.getValue() == seekBar.getMaximum()) {
+                        startSong();
+                        try {
+                            TimeUnit.MILLISECONDS.sleep(10);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                        setPlaying(true);
+                        options.seek((int) ans);
+                        seekBar.setValue((int) ans);
+                    } else {
+                        options.seek((int) ans);
+                        seekBar.setValue((int) ans);
+                    }
                 }
             }
 
@@ -312,22 +336,12 @@ public class South extends JPanel {
         volume.setBackground(MY_GRAY);
         volume.setFocusable(false);
         rightPanel.add(volume, BorderLayout.CENTER);
-        setSystemVolume(20);//new
-        volume.setValue(20);//new
-        volume.addMouseListener(new MouseAdapter() {//new
+        setSystemVolume(10);
+        volume.setValue(10);
+        volume.addChangeListener(new ChangeListener() {
             @Override
-            public void mouseReleased(MouseEvent e) {
-                super.mouseReleased(e);
-                double x = e.getX();
-                if (x <= 0)
-                    x = 0;
-                if(x >= 110)
-                    x = 110;
-                double volumeWidth = volume.getWidth();
-                double result = x / volumeWidth;
-                double ans = result * 100;
-                volume.setValue((int) ans);
-                setSystemVolume((int) ans);
+            public void stateChanged(ChangeEvent e) {
+                setSystemVolume(volume.getValue());
             }
         });
 
@@ -360,6 +374,7 @@ public class South extends JPanel {
                     listButton.setBackground(MY_GRAY);
                     SwingUsefulMethods.JButtonSetIcon(South.this, windowButton, "ICON_SOURCE\\windowib.png", 20, 20);
                     windowButton.setBackground(MY_GRAY);
+                    Manager.getInstance().getMainFrame().getCenterCenterCenter().refresh(Manager.getInstance().getMainFrame().getCenterCenterCenter().getPlaylist());
                 }
             }
 
@@ -400,6 +415,7 @@ public class South extends JPanel {
                     listButton.setBackground(MY_GRAY);
                     SwingUsefulMethods.JButtonSetIcon(South.this, windowButton, "ICON_SOURCE\\windowi.png", 20, 20);
                     windowButton.setBackground(MY_GRAY);
+                    Manager.getInstance().getMainFrame().getCenterCenterCenter().refresh(Manager.getInstance().getMainFrame().getCenterCenterCenter().getPlaylist());
                 }
             }
 
@@ -451,13 +467,13 @@ public class South extends JPanel {
                 if (!isCompact) {
                     isCompact = true;
                     SwingUsefulMethods.JButtonSetIcon(South.this, compactMode, "ICON_SOURCE\\compactib.png", 20, 20);
-                    Manager.getMainFrame().setSize(600, 113);
-                    Manager.getMainFrame().setResizable(false);
+                    Manager.getInstance().getMainFrame().setSize(600, 113);
+                    Manager.getInstance().getMainFrame().setResizable(false);
                 } else {
                     isCompact = false;
                     SwingUsefulMethods.JButtonSetIcon(South.this, compactMode, "ICON_SOURCE\\compacti.png", 20, 20);
-                    Manager.getMainFrame().setSize(800, 600);
-                    Manager.getMainFrame().setResizable(true);
+                    Manager.getInstance().getMainFrame().setSize(800, 600);
+                    Manager.getInstance().getMainFrame().setResizable(true);
                 }
             }
 
@@ -493,31 +509,58 @@ public class South extends JPanel {
         empty3.setPreferredSize(new Dimension(10, 0));
 
         timeElapsed = new MusicTime();
-//        JLabel elapsed = new JLabel(timeElapsed.toString() + "  ");
+        elapsed = new JLabel(timeElapsed.toString() + "  ");
         elapsed.setFont(FONT2);
         elapsed.setForeground(Color.WHITE);
         centerPanel.add(elapsed, BorderLayout.WEST);
 
-        timeTotal = new MusicTime();//new
-        timeTotal.setValue((int) Manager.getNowPlayingSong().getMp3File().getLengthInSeconds());//new
-        JLabel total = new JLabel("  " + timeTotal.toString());
+        total = new JLabel("  " + timeTotal.toString());
         total.setFont(FONT2);
         total.setForeground(Color.WHITE);
         centerPanel.add(total, BorderLayout.EAST);
-
-        changeSong();
     }
 
-    public void playSong(String address){
-        options = new Options(address, seekBar);
-        logicThread = new Thread(options);
-        logicThread.start();
-        Manager.setNowPlayingSong(new Song(address));
+    public boolean isRepeat() {
+        return isRepeat;
     }
-    public void changeSong(){
-        setAlbumName(Manager.getNowPlayingSong().getAlbumName());
-        setArtistName(Manager.getNowPlayingSong().getArtistName());
-        setSongName(Manager.getNowPlayingSong().getSongName());
+
+    public boolean isShuffle() {
+        return isShuffle;
+    }
+
+    public void startSong() {
+        if (Manager.getInstance().getNowPlayingSong() != null) {
+            try {
+                new FileInputStream(new File(Manager.getInstance().getNowPlayingSong().getFilePath()));
+            } catch (FileNotFoundException e) {
+                JOptionPane.showMessageDialog(null, "Couldn't find the file of the song.");
+                Manager.getInstance().removeSong(Manager.getInstance().getNowPlayingSong());
+                Manager.getInstance().getMainFrame().getCenterCenterCenter().refresh(Manager.getInstance().getMainFrame().getCenterCenterCenter().getPlaylist());
+                return;
+            }
+            if (logicThread != null && !options.isPaused()) {
+                logicThread.stop();
+            }
+            timeTotal.setValue(Manager.getInstance().getNowPlayingSong().getMp3File().getLengthInSeconds());
+            total.setText("  " + timeTotal.toString());
+            options = new Options(Manager.getInstance().getNowPlayingSong().getFilePath(), seekBar);
+            logicThread = new Thread(options);
+            logicThread.start();
+            seekBar.setMaximum(Manager.getInstance().getNowPlayingSong().getMp3File().getFrameCount() - 1);//new//fucking changed
+            seekBar.setMinimum(0);
+            seekBar.setValue(0);
+            isStarted = true;
+            setPlaying(true);
+            setAlbumName(Manager.getInstance().getNowPlayingSong().getAlbumName());
+            setArtistName(Manager.getInstance().getNowPlayingSong().getArtistName());
+            setSongName(Manager.getInstance().getNowPlayingSong().getSongName());
+            try {
+                Manager.getInstance().getMainFrame().getCenterWestSouth().changeImage();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Manager.getInstance().getNowPlayingSong().updateLastTimePlayed();
+        }
     }
 
     public void setSongName(String songName) {
@@ -540,26 +583,40 @@ public class South extends JPanel {
     }
 
     public void setSystemVolume(int volume) {
-        if(volume < 0 || volume > 100)
-        {
+        if (volume < 0 || volume > 100) {
             throw new RuntimeException("Error: " + volume + " is not a valid number. Choose a number between 0 and 100");
-        }
-
-        else
-        {
+        } else {
             double endVolume = 655.35 * volume;
 
             Runtime rt = Runtime.getRuntime();
             Process pr;
-            try
-            {
+            try {
                 pr = rt.exec("voice setting\\nircmd.exe" + " setsysvolume " + endVolume);
                 pr = rt.exec("voice setting\\nircmd.exe" + " mutesysvolume 0");
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
+        if (playing) {
+            SwingUsefulMethods.JButtonSetIcon(South.this, playPauseButton, "ICON_SOURCE\\pausei.png", 30, 30);
+        } else {
+            SwingUsefulMethods.JButtonSetIcon(South.this, playPauseButton, "ICON_SOURCE\\playi.png", 30, 30);
+        }
+    }
+
+    public boolean isListed() {
+        return isListed;
+    }
+
+    public JLabel getElapsed() {
+        return elapsed;
+    }
+
+    public JProgressBar getSeekBar() {
+        return seekBar;
     }
 }

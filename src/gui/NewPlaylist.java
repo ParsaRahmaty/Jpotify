@@ -1,12 +1,15 @@
 package gui;
 
+import logic.Manager;
+import logic.Playlist;
+
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.event.*;
 
 public class NewPlaylist extends JFrame {
-    private JTextField textField = new JTextField("New Playlist");
+    private JTextField textField = new JTextField();
     private JLabel label = new JLabel("Name your playlist");
     private JButton button = new JButton();
     private final Font FONT2 = new Font("Microsoft Sans Serif", Font.PLAIN, 11);
@@ -29,6 +32,14 @@ public class NewPlaylist extends JFrame {
             setSize(290, 100);
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
+            if (!Manager.getInstance().getPlaylists().contains(new Playlist("Playlist")))
+                textField.setText("Playlist");
+            else {
+                int index = 1;
+                while (Manager.getInstance().getPlaylists().contains(new Playlist("Playlist (" + index + ")")))
+                    index++;
+                textField.setText("Playlist (" + index + ")");
+            }
             isOpen = true;
             setResizable(false);
             add(label, BorderLayout.NORTH);
@@ -42,13 +53,12 @@ public class NewPlaylist extends JFrame {
             textField.setBackground(MY_GRAY);
             textField.setForeground(Color.WHITE);
             textField.setFont(FONT2);
-            textField.setBorder(new BevelBorder(BevelBorder.RAISED, new Color(50, 50, 50), new Color(50, 50, 50)));
+            textField.setBorder(new BevelBorder(BevelBorder.RAISED, new Color(43, 43, 43), MY_GRAY));
 
-            button.setBorder(new BevelBorder(BevelBorder.RAISED, new Color(50, 50, 50), new Color(50, 50, 50)));
+            button.setBorderPainted(false);
             button.setBackground(MY_GRAY);
             button.setFocusPainted(false);
             button.setFont(FONT2);
-//            button.setForeground(Color.WHITE);
             button.setBounds(245, 25, 25, 25);
             add(button, BorderLayout.EAST);
             SwingUsefulMethods.JButtonSetIcon(this, button, "ICON_SOURCE\\ticki.png", 20, 20);
@@ -74,15 +84,14 @@ public class NewPlaylist extends JFrame {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     isOpen = false;
-                    try {
-                        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-                        ex.printStackTrace();
+                    Playlist playlist = new Playlist(textField.getText());
+                    if (Manager.getInstance().addPlaylist(playlist)) {
+                        Manager.getInstance().getMainFrame().getCenterWestCenter().addPlaylist(playlist);
+                        NewPlaylist.this.dispose();
                     }
-                    NewPlaylist.this.dispose();
                 }
             });
-
+            textField.addActionListener(button.getActionListeners()[0]);
             setVisible(true);
         }
     }

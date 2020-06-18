@@ -1,15 +1,15 @@
 package gui;
 
 public class MusicTime {
-    private int second;
-    private int minute;
-    private int value;
+    private long second;
+    private long minute;
+    private long value;
 
     public MusicTime() {
         this.value = minute = second = 0;
     }
 
-    public MusicTime(int value) {
+    public MusicTime(long value) {
         if (value >= 0) {
             this.value = value;
             minute = value / 60;
@@ -19,7 +19,7 @@ public class MusicTime {
         }
     }
 
-    public void setValue(int value) {
+    public void setValue(long value) {
         if (value >= 0) {
             this.value = value;
             minute = value / 60;
@@ -27,6 +27,10 @@ public class MusicTime {
         } else {
             this.value = minute = second = 0;
         }
+    }
+
+    public long getValue() {
+        return value;
     }
 
     @Override

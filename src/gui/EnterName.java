@@ -1,15 +1,12 @@
 package gui;
 
 import logic.ChangeFrameListener;
-import logic.Manager;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-
-import static com.sun.java.accessibility.util.AWTEventMonitor.addWindowListener;
 
 public class EnterName extends JFrame {
     private String username;
@@ -41,9 +38,9 @@ public class EnterName extends JFrame {
         textField.setBackground(MY_GRAY);
         textField.setForeground(Color.WHITE);
         textField.setFont(FONT2);
-        textField.setBorder(new BevelBorder(BevelBorder.RAISED, new Color(50, 50, 50), new Color(50, 50, 50)));
+        textField.setBorder(new BevelBorder(BevelBorder.RAISED, new Color(43, 43, 43), MY_GRAY));
 
-        button.setBorder(new BevelBorder(BevelBorder.RAISED, new Color(50, 50, 50), new Color(50, 50, 50)));
+        button.setBorderPainted(false);
         button.setBackground(MY_GRAY);
         button.setFocusPainted(false);
         button.setFont(FONT2);
@@ -77,6 +74,8 @@ public class EnterName extends JFrame {
                         listener.changeFrames();
                     } catch (IOException ex) {
                         ex.printStackTrace();
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
                     }
                 }
             }

@@ -1,8 +1,11 @@
 package gui;
 
+import logic.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class PlaylistChooser extends JFrame {
     private static boolean isOpen = false;
@@ -12,7 +15,7 @@ public class PlaylistChooser extends JFrame {
     private final Font FONT2 = new Font("Microsoft Sans Serif", Font.PLAIN, 11);
     private final Color MY_GRAY = new Color(30, 30, 30);
 
-    public PlaylistChooser() {
+    public PlaylistChooser(Addable addable) {
         super("Choose a Playlist");
         ELEMENT_WIDTH = 5000;
         ELEMENT_HEIGHT = 30;
@@ -34,17 +37,17 @@ public class PlaylistChooser extends JFrame {
             panel.setLayout(new ModifiedFlowLayout());
             add(new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
             panel.setBackground(MY_GRAY);
-
-            addElement("Heavy Metal");
-            addElement("Hard Rock");
-            addElement("Favorite");
+            for (Playlist playlist : Manager.getInstance().getPlaylists()) {
+                addElement(playlist, addable);
+            }
+            addElement(Manager.getInstance().getNowPlaying(), "Now Playing", addable);
             setVisible(true);
             setResizable(false);
         }
     }
 
-    public void addElement(String playlistName) {
-        JButton button = new JButton(playlistName);
+    public void addElement(Playlist playlist, Addable addable) {
+        JButton button = new JButton(playlist.getName());
         button.setBorderPainted(false);
         button.setBackground(MY_GRAY);
         button.setFocusPainted(false);
@@ -77,6 +80,59 @@ public class PlaylistChooser extends JFrame {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (addable instanceof Song) {
+                    playlist.addSong((Song) addable);
+                } else if (addable instanceof SongCollection) {
+                    playlist.addSongs((SongCollection) addable);
+                }
+                PlaylistChooser.this.dispose();
+                isOpen = false;
+            }
+        });
+    }
+
+    public void addElement(ArrayList<Song> songs, String name, Addable addable) {
+        JButton button = new JButton(name);
+        button.setBorderPainted(false);
+        button.setBackground(MY_GRAY);
+        button.setFocusPainted(false);
+        button.setFont(FONT2);
+        button.setForeground(Color.WHITE);
+        panel.add(button, ModifiedFlowLayout.LEFT);
+        button.setPreferredSize(new Dimension(ELEMENT_WIDTH, ELEMENT_HEIGHT));
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
+                button.setBackground(new Color(43, 43, 43));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                super.mouseExited(e);
+                button.setBackground(MY_GRAY);
+            }
+        });
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (addable instanceof Song) {
+                    if (((Song) addable).getMp3File() != null) {
+                        songs.add((Song) addable);
+                    }
+                } else if (addable instanceof SongCollection) {
+                    for (Song song : ((SongCollection) addable).getSongs()) {
+                        if (song.getMp3File() != null) {
+                            songs.add(song);
+                        }
+                    }
+                }
                 PlaylistChooser.this.dispose();
                 isOpen = false;
             }

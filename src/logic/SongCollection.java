@@ -2,12 +2,13 @@ package logic;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public abstract class SongCollection {
+public abstract class SongCollection implements Serializable {
     protected ArrayList<Song> songs = new ArrayList<>();
     protected String name;
-    protected BufferedImage image = null;
+    protected transient BufferedImage image = null;
 
     public SongCollection(String name) {
         this.name = name;
@@ -27,15 +28,18 @@ public abstract class SongCollection {
         return name;
     }
 
-    public void removeSong(Song song) {
+    public boolean removeSong(Song song) {
         if (songs.contains(song)) {
             songs.remove(song);
             updateImage();
-        } else
+            return true;
+        } else {
             JOptionPane.showMessageDialog(null, "The specified song doesn't exist");
+            return false;
+        }
     }
 
-    protected void updateImage() {
+    public void updateImage() {
         for (Song song : songs) {
             if (song.getImage() != null) {
                 this.image = song.getImage();
@@ -44,12 +48,16 @@ public abstract class SongCollection {
         }
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof Song)) {
+        if (!(obj instanceof SongCollection)) {
             return false;
         }
         if (name.equals(((SongCollection) obj).getName())) {

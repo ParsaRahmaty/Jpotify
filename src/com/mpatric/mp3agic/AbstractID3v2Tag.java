@@ -1,9 +1,10 @@
 package com.mpatric.mp3agic;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
-public abstract class AbstractID3v2Tag implements ID3v2 {
+public abstract class AbstractID3v2Tag implements ID3v2, Serializable {
 
 	public static final String ID_IMAGE = "APIC";
 	public static final String ID_ENCODER = "TENC";

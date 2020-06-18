@@ -3,16 +3,20 @@ package logic;
 import gui.MusicTime;
 import gui.South;
 import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.Player;
 import javazoom.jl.player.advanced.AdvancedPlayer;
 
 import javax.swing.*;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
+
+/**
+ * this class handle all works with playing, pausing, resuming and seeking the music
+ * and make the music player(specifically mp3) and stores the frames read by the player
+ * as a field to itself as one frame is read the playedFrames increases until it reaches
+ * the end of music
+ */
 
 public class Options implements Runnable {
-    private JFileChooser fileChooser;
     private FileInputStream input;
     private BufferedInputStream bufferedInput;
     private AdvancedPlayer player;
@@ -26,7 +30,6 @@ public class Options implements Runnable {
         this.address = address;
         isPaused = false;
         playedFrames = 1;
-        fileChooser = new JFileChooser();
     }
 
 
@@ -38,29 +41,23 @@ public class Options implements Runnable {
                 input = new FileInputStream(new File(this.address));
                 isFileOpened = true;
             } catch (FileNotFoundException e) {
-                JOptionPane.showMessageDialog(null, "can't open file, please try again!");
-                int result = fileChooser.showOpenDialog(null);
-                if (result == JOptionPane.CLOSED_OPTION || result == JOptionPane.CANCEL_OPTION)
-                    return;
-                setAddress(fileChooser.getSelectedFile().getAbsolutePath());
-                isFileOpened = false;
+                JOptionPane.showMessageDialog(null, "Couldn't find the file of the song.");
+                return;
             }
         }
         bufferedInput = new BufferedInputStream(input);
         try {
             player = new AdvancedPlayer(bufferedInput);
-        } catch (JavaLayerException e) {
-            JOptionPane.showMessageDialog(null, "FATAL ERROR");
-        }
+        } catch (JavaLayerException ignored) {}
         try {
             while (player.play(1)) {
-                long coefficient = Manager.getNowPlayingSong().getMp3File().getFrameCount() / Manager.getNowPlayingSong().getMp3File().getLengthInSeconds();
-                Manager.getMainFrame().getSouth().getTimeElapsed().setValue(playedFrames / (int) coefficient);
-                South.elapsed.setText(Manager.getMainFrame().getSouth().getTimeElapsed().toString() + " ");
+                long coefficient = Manager.getInstance().getNowPlayingSong().getMp3File().getFrameCount() / Manager.getInstance().getNowPlayingSong().getMp3File().getLengthInSeconds();
+                Manager.getInstance().getMainFrame().getSouth().getTimeElapsed().setValue(playedFrames / (int) coefficient);
+                Manager.getInstance().getMainFrame().getSouth().getElapsed().setText(Manager.getInstance().getMainFrame().getSouth().getTimeElapsed().toString() + "  ");
 //                South.elapsed.setText(Integer.toString(playedFrames / (int)coefficient));//new
-                if (playedFrames / (int) coefficient >= Manager.getNowPlayingSong().getMp3File().getLengthInSeconds()) {
-                    Manager.getMainFrame().getSouth().getTimeElapsed().setValue((int) Manager.getNowPlayingSong().getMp3File().getLengthInSeconds());
-                    South.elapsed.setText(Manager.getMainFrame().getSouth().getTimeElapsed().toString() + " ");
+                if (playedFrames / (int) coefficient >= Manager.getInstance().getNowPlayingSong().getMp3File().getLengthInSeconds()) {
+                    Manager.getInstance().getMainFrame().getSouth().getTimeElapsed().setValue((int) Manager.getInstance().getNowPlayingSong().getMp3File().getLengthInSeconds());
+                    Manager.getInstance().getMainFrame().getSouth().getElapsed().setText(Manager.getInstance().getMainFrame().getSouth().getTimeElapsed().toString() + "  ");
                 }
 //                South.elapsed.setText(South.timeElapsed.toString() + " ");
 
@@ -74,12 +71,13 @@ public class Options implements Runnable {
             }
             playedFrames++;
             seekBar.setValue(playedFrames);
-            if (seekBar.getValue() == seekBar.getMaximum())
+            if (seekBar.getValue() == seekBar.getMaximum()) {
                 isPaused = true;
-        } catch (InterruptedException ex) {
+                Manager.getInstance().calculateNextSong(Manager.getInstance().getMainFrame().getSouth().isRepeat(), Manager.getInstance().getMainFrame().getSouth().isShuffle());
+                Manager.getInstance().getMainFrame().getSouth().startSong();
+            }
+        } catch (InterruptedException | JavaLayerException ex) {
             ex.printStackTrace();
-        } catch (JavaLayerException e) {
-            e.printStackTrace();
         }
     }
 
@@ -104,11 +102,9 @@ public class Options implements Runnable {
 
     public void seek(int frame) {
         synchronized (player) {
-            boolean isFileOpened = false;
             try {
                 if (isPaused) {
                     resumeMusic();
-//                player.close();
                     input = new FileInputStream(new File(this.address));
                     bufferedInput = new BufferedInputStream(input);
                     player = new AdvancedPlayer(bufferedInput);
@@ -116,8 +112,7 @@ public class Options implements Runnable {
                     this.seekBar.setValue(playedFrames);
                     player.play(frame, frame + 1);
                     pauseMusic();
-                }
-                else {
+                } else {
                     input = new FileInputStream(new File(this.address));
                     bufferedInput = new BufferedInputStream(input);
                     player = new AdvancedPlayer(bufferedInput);
@@ -127,14 +122,7 @@ public class Options implements Runnable {
                 }
             } catch (FileNotFoundException e) {
                 JOptionPane.showMessageDialog(null, "can't open file, please try again!");
-                int result = fileChooser.showOpenDialog(null);
-                if (result == JOptionPane.CLOSED_OPTION || result == JOptionPane.CANCEL_OPTION)
-                    return;
-                setAddress(fileChooser.getSelectedFile().getAbsolutePath());
-                isFileOpened = false;
-            } catch (JavaLayerException e) {
-                JOptionPane.showMessageDialog(null, "FATAL ERROR");
-            }
+            } catch (JavaLayerException ignored) {}
         }
     }
 

@@ -1,9 +1,10 @@
 package com.mpatric.mp3agic;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-public class ID3v1Tag implements ID3v1 {
+public class ID3v1Tag implements ID3v1, Serializable {
 
 	public static final int TAG_LENGTH = 128;
 

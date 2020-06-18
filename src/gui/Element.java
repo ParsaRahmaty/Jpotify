@@ -1,5 +1,8 @@
 package gui;
 
+import logic.Playlist;
+import logic.Song;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -8,4 +11,11 @@ public abstract class Element extends JPanel{
     protected JLabel firstLabel;
     protected JLabel secondLabel;
     protected JLabel thirdLabel;
+    protected JButton removeFromPlaylist;
+    protected JButton addToPlaylist = new JButton();
+    protected JButton shiftBack;
+    protected JButton shiftFront;
+    protected final Color MY_GRAY2 = new Color(50, 50, 50);
+
+    public abstract void setPlaylist(Song song, Playlist playlist);
 }

@@ -2,7 +2,7 @@ package logic;
 
 import javax.swing.*;
 
-public class Album extends SongCollection {
+public class Album extends SongCollection implements Addable{
     private String artistName;
 
     public Album(String albumName, String artistName) {
@@ -17,5 +17,9 @@ public class Album extends SongCollection {
             updateImage();
         } else
             JOptionPane.showMessageDialog(null, "Error occurred while adding");
+    }
+
+    public String getArtistName() {
+        return artistName;
     }
 }

@@ -1,9 +1,10 @@
 package com.mpatric.mp3agic;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-public class ID3v2Frame {
+public class ID3v2Frame implements Serializable {
 
 	private static final int HEADER_LENGTH = 10;
 	private static final int ID_OFFSET = 0;

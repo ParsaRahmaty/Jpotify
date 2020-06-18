@@ -4,7 +4,6 @@ import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
-import gui.South;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -12,11 +11,11 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Date;
 
-public class Song {
+public class Song implements Addable, Serializable{
     private String songName = "";
     private String albumName = "";
     private String artistName = "";
-    private BufferedImage image;
+    private transient BufferedImage image;
     private String filePath;
     private Mp3File mp3File;
     private long lastTimePlayed;
@@ -28,6 +27,21 @@ public class Song {
             importInformation();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Error occurred finding the file");
+        } catch (InvalidDataException e) {
+            JOptionPane.showMessageDialog(null, "The given file extension is not supported");
+        } catch (UnsupportedTagException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Song(String filePath, boolean shouldShowError) {
+        try {
+            mp3File = new Mp3File(filePath);
+            this.filePath = filePath;
+            importInformation();
+        } catch (IOException e) {
+            if (shouldShowError)
+                JOptionPane.showMessageDialog(null, "Error occurred finding the file");
         } catch (InvalidDataException e) {
             JOptionPane.showMessageDialog(null, "The given file extension is not supported");
         } catch (UnsupportedTagException e) {
@@ -69,19 +83,23 @@ public class Song {
         } else {
             songName = albumName = artistName = null;
         }
-        if (songName == null) {
+        if (songName == null || songName.trim().equals("")) {
             File file = new File(filePath);
             songName = file.getName().substring(0, file.getName().length() - 4);
         }
-        if (albumName == null)
+        if (albumName == null || albumName.trim().equals(""))
             albumName = "Unknown Album";
-        if (artistName == null)
+        if (artistName == null || artistName.trim().equals(""))
             artistName = "Unknown Artist";
-        byte[] imageData = id3v2tag.getAlbumImage();
-        if (imageData == null)
-            image = null;
-        else
-            image = ImageIO.read(new ByteArrayInputStream(imageData));
+        if (mp3File.hasId3v2Tag()) {
+            byte[] imageData = id3v2tag.getAlbumImage();
+            if (imageData == null)
+                image = null;
+            else
+                try {
+                    image = ImageIO.read(new ByteArrayInputStream(imageData));
+                } catch (Exception ignored) {}
+        }
     }
 
     public String getSongName() {
@@ -116,17 +134,30 @@ public class Song {
         this.lastTimePlayed = new Date().getTime();
     }
 
+    public void updateLostInfos() throws IOException {
+        ID3v2 id3v2tag = mp3File.getId3v2Tag();
+        if (mp3File.hasId3v2Tag()) {
+            byte[] imageData = id3v2tag.getAlbumImage();
+            if (imageData == null)
+                image = null;
+            else
+                try {
+                    image = ImageIO.read(new ByteArrayInputStream(imageData));
+                } catch (IllegalArgumentException ignored) {}
+        }
+    }
+
     @Override
     public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
         if (obj == this) {
             return true;
         }
         if (!(obj instanceof Song)) {
             return false;
         }
-        if (filePath.equals(((Song) obj).getFilePath())) {
-            return true;
-        }
-        return false;
+        return filePath.equals(((Song) obj).getFilePath());
     }
 }

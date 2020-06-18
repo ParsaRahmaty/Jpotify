@@ -21,23 +21,14 @@ public class SwingUsefulMethods {
         }
     }
 
-    public static void paintScrollPane(JScrollPane scrollPane, Color arrowColor, Color barColor, Color backgroundColor) {
-        UIManager.put("ScrollBar.thumb", new ColorUIResource(arrowColor));
-
+    public static void paintScrollPane(JScrollPane scrollPane, Color barColor, Color backgroundColor) {
         scrollPane.getVerticalScrollBar().setBackground(backgroundColor);
 
-        scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
+        scrollPane.getVerticalScrollBar().setUI(new NoArrowScrollBarUI() {
             @Override
             protected void configureScrollBarColors(){
                 this.thumbColor = barColor;
             }
         });
-        scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
-            @Override
-            protected void configureScrollBarColors(){
-                this.thumbColor = barColor;
-            }
-        });
-
     }
 }

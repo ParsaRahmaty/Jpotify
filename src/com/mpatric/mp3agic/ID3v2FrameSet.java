@@ -1,9 +1,10 @@
 package com.mpatric.mp3agic;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ID3v2FrameSet {
+public class ID3v2FrameSet implements Serializable {
 
 	private String id;
 	private ArrayList<ID3v2Frame> frames;
